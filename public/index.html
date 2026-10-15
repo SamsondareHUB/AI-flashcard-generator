@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Flashcards</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <h1>AI Flashcard Generator</h1>
+
+    <input
+      id="topic"
+      placeholder="Enter a topic, e.g. JavaScript arrays"
+    />
+
+    <button onclick="generateCards()">
+      Generate flashcards
+    </button>
+
+    <div id="cards"></div>
+  </main>
+
+  <script>
+    async function generateCards() {
+      const topic = document.getElementById("topic").value;
+      const cardsDiv = document.getElementById("cards");
+
+      if (!topic) {
+        cardsDiv.innerHTML = "<p>Please enter a topic.</p>";
+        return;
+      }
+
+      cardsDiv.innerHTML = "<p>Generating...</p>";
+
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ topic })
+      });
+
+      const data = await response.json();
+
+      if (!data.cards) {
+        cardsDiv.innerHTML = "<p>Sorry, something went wrong.</p>";
+        return;
+      }
+
+      cardsDiv.innerHTML = data.cards.map(card => `
+        <div class="card">
+          <p><strong>${card.question}</strong></p>
+
+          <button onclick="this.nextElementSibling.style.display='block'">
+            Show answer
+          </button>
+
+          <p class="answer" style="display:none">
+            ${card.answer}
+          </p>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>
